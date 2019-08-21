@@ -17,27 +17,28 @@ namespace ConsoleApp1
             //// VoxCodei Solution 
             //// Test
 
-            SpoonProcessor Sp = new SpoonProcessor(7, 7);
+            SpoonProcessor Sp = new SpoonProcessor(5,2);
 
-            string s1 = "..0....";
-            string s2 = ".......";
-            string s3 = "..0.0.0";
-            string s4 = ".......";
-            string s5 = "0.0.0..";
-            string s6 = ".......";
-            string s7 = "....0..";
+            string s1 = "0.0.0";
+            string s2 = "..0..";
+            //string s3 = "..0.0.0";
+            //string s4 = "..0....";
+            //string s5 = "0.0.00.";
+            //string s6 = ".......";
+            //string s7 = "....00.";
 
             //Mapper le terrain
             Sp.MapLine(s1);
+
             Sp.MapLine(s2);
-            Sp.MapLine(s3);
-            Sp.MapLine(s4);
-            Sp.MapLine(s5);
-            Sp.MapLine(s6);
-            Sp.MapLine(s7);
+            //Sp.MapLine(s3);
+            //Sp.MapLine(s4);
+            //Sp.MapLine(s5);
+            //Sp.MapLine(s6);
+            //Sp.MapLine(s7);
 
             // Afficher chaque point du terrain, ses valeurs et coordonnées
-            Sp.Display();
+            // Sp.Display();
 
 
             // Boucle de jeu
@@ -64,8 +65,7 @@ namespace ConsoleApp1
         public bool IsNode;
 
         // List of Neighbour Nodes (next nodes to the right and to the bottom)
-        public List<point> Nodes;
-
+        public List<point> Nodes = new List<point>();
 
         public point(int x, int y)
         {
@@ -126,24 +126,47 @@ namespace ConsoleApp1
                 {
                     StringBuilder S = new StringBuilder();
 
-                    if (p.X + 1 < width)
+                    if (p.Y + 1 < width)
                     {
-                        if (field[p.Y, p.X + 1].IsNode)
-                        {
-                            p.Nodes.Add(field[p.X + 1, p.Y]);
-                            S.Append($"{p.Y} {p.X + 1}");
-                        }
-                    }
-                    if (p.Y + 1 < height)
-                    {
-                        if (field[p.Y + 1, p.X ].IsNode)
+                        if (field[p.X, p.Y + 1].IsNode)
                         {
                             p.Nodes.Add(field[p.X, p.Y + 1]);
-                            S.Append($" {p.Y + 1} {p.X} ");
+
+                            S.Append($" {p.Y + 1} {p.X}");
+                        }
+                        else if (field[p.X, p.Y + 1].IsNode == false)
+                        {
+                            S.Append(" -1 -1");
                         }
                     }
 
-                    Console.Error.WriteLine($"{p.X} {p.Y} " + S.ToString());
+                    else if (p.Y == width - 1)
+                    {
+                        S.Append(" -1 -1");
+                    }
+
+                    if (p.X + 1 < height)
+                    {
+                        if (field[p.X + 1, p.Y].IsNode)
+                        {
+                            p.Nodes.Add(field[p.X + 1, p.Y]);
+                            S.Append($" {p.Y} {p.X + 1}");
+                        }
+                        else if (field[p.X + 1, p.Y].IsNode == false || p.X == 6)
+                        {
+                            S.Append(" -1 -1");
+                        }
+                    }
+
+                    else if (p.X == height-1)
+                    {
+                        S.Append(" -1 -1");
+                    }
+
+
+                    Console.WriteLine($"{p.Y} {p.X}" + S.ToString());
+
+
                 }
 
             }
