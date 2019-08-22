@@ -44,6 +44,7 @@ namespace ConsoleApp1
             // Boucle de jeu
             Console.Error.WriteLine();
             Sp.Display();
+            Console.WriteLine();
             Sp.FindNeighbour();
 
             Console.Error.WriteLine();
@@ -63,9 +64,6 @@ namespace ConsoleApp1
         public int Y { get; set; }
 
         public bool IsNode;
-
-        // List of Neighbour Nodes (next nodes to the right and to the bottom)
-        public List<point> Nodes = new List<point>();
 
         public point(int x, int y)
         {
@@ -126,43 +124,40 @@ namespace ConsoleApp1
                 {
                     StringBuilder S = new StringBuilder();
 
-                    if (p.Y + 1 < width)
+                    // Recherche Horizontale
+                    for (int i = p.Y + 1; i < width; i++)
                     {
-                        if (field[p.X, p.Y + 1].IsNode)
-                        {
-                            p.Nodes.Add(field[p.X, p.Y + 1]);
-
-                            S.Append($" {p.Y + 1} {p.X}");
-                        }
-                        else if (field[p.X, p.Y + 1].IsNode == false)
+                        if (i == width - 1 && field[p.X, i].IsNode == false)
                         {
                             S.Append(" -1 -1");
+                            break;
                         }
-                    }
-
-                    else if (p.Y == width - 1)
-                    {
-                        S.Append(" -1 -1");
-                    }
-
-                    if (p.X + 1 < height)
-                    {
-                        if (field[p.X + 1, p.Y].IsNode)
+                        if (i >= width)
+                            break;
+                        if (field[p.X, i].IsNode)
                         {
-                            p.Nodes.Add(field[p.X + 1, p.Y]);
-                            S.Append($" {p.Y} {p.X + 1}");
+                            S.Append($" {i} {p.X}");
+                            break;
                         }
-                        else if (field[p.X + 1, p.Y].IsNode == false || p.X == 6)
+                    }
+                    // Recherche Verticale
+                    for (int i = p.X + 1; i < height; i++)
+                    {
+
+                        if (i == height - 1 && field[i, p.Y].IsNode == false)
                         {
                             S.Append(" -1 -1");
+                            break;
+                        }
+
+                        if (i >= height)
+                            break;
+                        if (field[i, p.Y].IsNode)
+                        {
+                            S.Append($" {p.Y} {i}");
+                            break;
                         }
                     }
-
-                    else if (p.X == height-1)
-                    {
-                        S.Append(" -1 -1");
-                    }
-
 
                     Console.WriteLine($"{p.Y} {p.X}" + S.ToString());
 
