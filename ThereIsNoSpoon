@@ -17,10 +17,10 @@ namespace ConsoleApp1
             //// VoxCodei Solution 
             //// Test
 
-            SpoonProcessor Sp = new SpoonProcessor(5,2);
+            SpoonProcessor Sp = new SpoonProcessor(5,1);
 
             string s1 = "0.0.0";
-            string s2 = "..0..";
+            //string s2 = "..0..";
             //string s3 = "..0.0.0";
             //string s4 = "..0....";
             //string s5 = "0.0.00.";
@@ -30,7 +30,7 @@ namespace ConsoleApp1
             //Mapper le terrain
             Sp.MapLine(s1);
 
-            Sp.MapLine(s2);
+            //Sp.MapLine(s2);
             //Sp.MapLine(s3);
             //Sp.MapLine(s4);
             //Sp.MapLine(s5);
@@ -124,10 +124,13 @@ namespace ConsoleApp1
                 {
                     StringBuilder S = new StringBuilder();
 
+                    //string s1 = "0.0.0";
+                    //string s2 = "..0..";
+
                     // Recherche Horizontale
-                    for (int i = p.Y + 1; i < width; i++)
+                    for (int i = p.Y + 1; i <= width; i++)
                     {
-                        if (i == width - 1 && field[p.X, i].IsNode == false)
+                        if (i == width)
                         {
                             S.Append(" -1 -1");
                             break;
@@ -141,10 +144,10 @@ namespace ConsoleApp1
                         }
                     }
                     // Recherche Verticale
-                    for (int i = p.X + 1; i < height; i++)
+                    for (int i = p.X + 1; i <= height; i++)
                     {
 
-                        if (i == height - 1 && field[i, p.Y].IsNode == false)
+                        if (i == height)
                         {
                             S.Append(" -1 -1");
                             break;
@@ -158,10 +161,7 @@ namespace ConsoleApp1
                             break;
                         }
                     }
-
                     Console.WriteLine($"{p.Y} {p.X}" + S.ToString());
-
-
                 }
 
             }
