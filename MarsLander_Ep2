@@ -1,203 +1,219 @@
 using System;
-using System.Collections.Generic;
 using System.Linq;
+using System.IO;
 using System.Text;
-using System.Threading.Tasks;
+using System.Collections;
+using System.Collections.Generic;
 
-namespace ConsoleApp1
+/**
+ * Auto-generated code below aims at helping you parse
+ * the standard input according to the problem statement.
+ **/
+class Player
 {
-    /// <summary>
-    /// There is No Spoon Solution
-    /// </summary>
-    class Program
+    static void Main(string[] args)
     {
-        static void Main(string[] args)
+        string[] inputs;
+        int surfaceN = int.Parse(Console.ReadLine()); // the number of points used to draw the surface of Mars.
+        
+        Console.Error.WriteLine("Surface points are:  " + surfaceN);
+        FieldMapper FM = new FieldMapper(surfaceN);
+        Lander lander = new Lander();
+        
+        for (int i = 0; i < surfaceN; i++)
         {
-
-            //// Mars Lander
-            //// Test
-
-            //FieldMapper FM = new FieldMapper(5);
-
-            Lander lander = new Lander();
-            lander.Site = new point[] { new point(500, 1000), new point(2000, 1000) };
-            lander.X = 2000;
-            lander.Y = 1000;
-
-            lander.CalcPosition();
+            inputs = Console.ReadLine().Split(' ');
+            int landX = int.Parse(inputs[0]); // X coordinate of a surface point. (0 to 6999)
+            int landY = int.Parse(inputs[1]); // Y coordinate of a surface point. By linking all the points together in a sequential fashion, you form the surface of Mars.
+            Console.Error.WriteLine($"LandX is {landX} LandY is {landY}");
             
+            FM.Map(landX,landY);
+            
+        }
 
+        //Console.Error.WriteLine($"LandX is {landX} LandY is {landY}");
+        
+        FM.FindSite();
+        Console.Error.WriteLine($" Altitude of site is {FM.Site[0].Y} {FM.Site[1].Y}");
 
+        // game loop
+        while (true)
+        {
+            inputs = Console.ReadLine().Split(' ');
+            int X = int.Parse(inputs[0]);
+            int Y = int.Parse(inputs[1]);
+            int hSpeed = int.Parse(inputs[2]); // the horizontal speed (in m/s), can be negative.
+            int vSpeed = int.Parse(inputs[3]); // the vertical speed (in m/s), can be negative.
+            int fuel = int.Parse(inputs[4]); // the quantity of remaining fuel in liters.
+            int rotate = int.Parse(inputs[5]); // the rotation angle in degrees (-90 to 90).
+            int power = int.Parse(inputs[6]); // the thrust power (0 to 4).
 
+            lander.Site = FM.Site;
+            lander.ActualizeLander(X,Y,hSpeed,vSpeed,fuel);
+            lander.CalcPosition();
+            lander.Decide();
+            lander.Order();
 
+            // Write an action using Console.WriteLine()
+            // To debug: Console.Error.WriteLine("Debug messages...");
 
-            Console.ReadLine();
-
-
+            // rotate power. rotate is the desired rotation angle. power is the desired thrust power.
+            //Console.WriteLine("-40 3");
         }
     }
-
-
-    public class point
+}
+public class point
+{
+    public int X { get; set; }
+    public int Y { get; set; }
+    public point(int x, int y)
     {
-        public int X { get; set; }
-        public int Y { get; set; }
-        public point(int x, int y)
-        {
-            X = x;
-            Y = y;
-        }
+        X = x;
+        Y = y;
+    }
+}
+
+/// Class de Detection de zone d'aterrissage
+public class FieldMapper
+{
+    // Nombre de points qui composent la surface
+    public List<point> Field = new List<point>();
+
+    public int surface;
+
+    public List<point> Site = new List<point>();
+
+    public FieldMapper(int surfacepts)
+    {
+        surface = surfacepts;
     }
 
-    /// Class de Detection de zone d'aterrissage
-    public class FieldMapper
+    public void Map (int x, int y)
     {
-        // Nombre de points qui composent la surface
-        public List<point> Field = new List<point>();
+        Field.Add(new point(x, y));
+    }
 
-        public int surface;
+    public void FindSite ()
+    {
 
-        public List<point> Site = new List<point>();
-
-        public FieldMapper(int surfacepts)
+        for (int i = 0; i < Field.Count - 1; i++)
         {
-            surface = surfacepts;
-        }
+            var split = Field[i + 1].X - Field[i].X;
 
-        public void Map (int x, int y)
-        {
-            Field.Add(new point(x, y));
-        }
-
-        public void FindSite ()
-        {
-
-            for (int i = 0; i < Field.Count - 1; i++)
+            if (split >=1000 && Field[i + 1].Y == Field[i].Y)
             {
-                var split = Field[i + 1].X - Field[i].X;
+                // Debut du Landing Site
+                Site.Add(new point(Field[i].X, Field[i].Y));
 
-                if (split >=1000 && Field[i + 1].Y == Field[i].Y)
-                {
-                    // Debut du Landing Site
-                    Site.Add(new point(Field[i].X, Field[i].Y));
-
-                    // Fin du Landing Site
-                    Site.Add(new point(Field[i+1].X, Field[i+1].Y));
-                }
+                // Fin du Landing Site
+                Site.Add(new point(Field[i+1].X, Field[i+1].Y));
             }
-            Console.Error.WriteLine($"Début {Site[0].X} Fin {Site[1].X} ");
         }
+        Console.Error.WriteLine($"Début {Site[0].X} Fin {Site[1].X} ");
+    }
+
+}
+public enum RelativePosition { Above, Below, SiteLvl, Left, Right, InSite };
+public class Lander
+{
+    // 0 - 7000
+    public int X;
+
+    // 0 - 3000
+    public int Y;
+
+    // + Up - Down
+    public int Vspeed;
+    // - Left + Right
+    public int HSpeed;
+
+    public int Fuel;
+
+    // + Left - Right (0 - 90)
+    public int Angle;
+    public int AngleChange;
+    // Thrust 0-4
+    public int Power;
+    public int ThrustChange;
+
+    public List<point> Site = new List<point>();
+
+    public RelativePosition XPosition;
+    public RelativePosition YPosition;
+
+    public Lander()
+    {
+    }
+
+    public void ActualizeLander (int x, int y, int h, int v, int fuel)
+    {
+        X = x;
+        Y = y;
+        HSpeed = h;
+        Vspeed = v;
+        Fuel = fuel;
+    }
+
+    public void CalcPosition ()
+    {
+
+        // Lander is left or right from site
+        if (Site[0].X <= X && Site[1].X >= X)
+            XPosition = RelativePosition.InSite;
+        if (X > Site[1].X)
+            XPosition = RelativePosition.Right;
+        if (X < Site[0].X)
+            XPosition = RelativePosition.Left;
+
+        // Lander is above or below from site
+        if (Y == Site[0].Y)
+            YPosition = RelativePosition.SiteLvl;
+        if (Site[0].Y < Y)
+            YPosition = RelativePosition.Above;
+        else if (Site[0].Y > Y)
+            YPosition = RelativePosition.Below;
+
+        Console.Error.WriteLine($"{XPosition} {YPosition}");
+    }
+
+    public void Decide()
+    {
+        if (Vspeed < -10)
+            ThrustChange = 1;
+
+        if (XPosition == RelativePosition.Right)
+            AngleChange = 15;
+
+        if (XPosition == RelativePosition.Left)
+            AngleChange = -15;
+
+        if (YPosition == RelativePosition.Above && Vspeed < 0)
+            ThrustChange = 1;
+        if (YPosition == RelativePosition.Above && Vspeed > 0)
+            ThrustChange = - 1;
+
+        if (YPosition == RelativePosition.SiteLvl && XPosition == RelativePosition.InSite)
+            Power = 0;
+
+        if (YPosition == RelativePosition.Above && Vspeed >= 100)
+            ThrustChange = 1;
+
+        Console.Error.WriteLine($"Angle decision : {AngleChange} Power decision : {ThrustChange}");
 
     }
-    public enum RelativePosition { Above, Below, SiteLvl, Left, Right, InSite };
-    public class Lander
+
+    public void Order()
     {
-        // 0 - 7000
-        public int X;
-
-        // 0 - 3000
-        public int Y;
-
-        // + Up - Down
-        public int Vspeed;
-        // - Left + Right
-        public int HSpeed;
-
-        public int Fuel;
-
-        // + Left - Right (0 - 90)
-        public int Angle;
-        public int AngleChange;
-        // Thrust 0-4
-        public int Power;
-        public int ThrustChange;
-
-        public point[] Site = new point[2];
-
-        public RelativePosition XPosition;
-        public RelativePosition YPosition;
-
-        public Lander()
+        if (Power + ThrustChange < 0 || Power + ThrustChange > 4)
         {
-        }
-
-        public void ActualizeLander (int x, int y, int h, int v, int fuel)
-        {
-            X = x;
-            Y = y;
-            HSpeed = h;
-            Vspeed = v;
-            Fuel = fuel;
-            AngleChange = 0;
             ThrustChange = 0;
         }
-
-        public void CalcPosition ()
+        
+        if (Angle + AngleChange < -90 || Angle + AngleChange > 90)
         {
-
-            // Lander is left or right from site
-            if (Site[0].X <= X && Site[1].X >= X)
-                XPosition = RelativePosition.InSite;
-            if (X > Site[1].X)
-                XPosition = RelativePosition.Right;
-            if (X < Site[0].X)
-                XPosition = RelativePosition.Left;
-
-            // Lander is above or below from site
-            if (Y == Site[0].Y)
-                YPosition = RelativePosition.SiteLvl;
-            if (Site[0].Y < Y)
-                YPosition = RelativePosition.Above;
-            else if (Site[0].Y > Y)
-                YPosition = RelativePosition.Below;
-
-            Console.Error.WriteLine($"{XPosition} {YPosition}");
+            AngleChange = 0;
         }
-
-        public void Decide()
-        {
-            
-            if (XPosition == RelativePosition.Right)
-            {
-                AngleChange = 15;
-            }
-            if (XPosition == RelativePosition.Left)
-            {
-                AngleChange = -15;
-            }
-            if (YPosition == RelativePosition.Above)
-            {
-
-            }
-            if (YPosition == RelativePosition.SiteLvl && XPosition == RelativePosition.InSite)
-            {
-                Power = 0;
-            }
-            if (YPosition == RelativePosition.Above)
-            {
-                ThrustChange = 2;
-            }
-            if (YPosition == RelativePosition.Above && Vspeed >= 100)
-                ThrustChange = 1;
-
-            Console.Error.WriteLine($"{XPosition} {YPosition}");
-
-        }
-
-        public void Order()
-        {
-            if (Power == 0 || Power == 4)
-            {
-                ThrustChange = 0;
-            }
-            if (Angle == -90 || Angle == 90)
-            {
-                AngleChange = 0;
-            }
-            Console.WriteLine($"{Angle + AngleChange} {Power + ThrustChange}");
-        }
-
+        Console.WriteLine($"{Angle + AngleChange} {Power + ThrustChange}");
     }
-
 
 }
