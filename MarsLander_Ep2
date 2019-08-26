@@ -21,8 +21,8 @@ namespace ConsoleApp1
 
             Lander lander = new Lander();
             lander.Site = new point[] { new point(500, 1000), new point(2000, 1000) };
-            lander.X = 3000;
-            lander.Y = 6999;
+            lander.X = 2000;
+            lander.Y = 1000;
 
             lander.CalcPosition();
             
@@ -42,20 +42,14 @@ namespace ConsoleApp1
     {
         public int X { get; set; }
         public int Y { get; set; }
-
         public point(int x, int y)
         {
             X = x;
             Y = y;
-
         }
-
     }
 
-
-    /// <summary>
     /// Class de Detection de zone d'aterrissage
-    /// </summary>
     public class FieldMapper
     {
         // Nombre de points qui composent la surface
@@ -95,7 +89,7 @@ namespace ConsoleApp1
         }
 
     }
-    public enum RelativePosition { Above, Below, Left, Right };
+    public enum RelativePosition { Above, Below, SiteLvl, Left, Right, InSite };
     public class Lander
     {
         // 0 - 7000
@@ -111,11 +105,12 @@ namespace ConsoleApp1
 
         public int Fuel;
 
-        // + Left - Right (0 -90)
+        // + Left - Right (0 - 90)
         public int Angle;
-
+        public int AngleChange;
         // Thrust 0-4
         public int Power;
+        public int ThrustChange;
 
         public point[] Site = new point[2];
 
@@ -133,45 +128,74 @@ namespace ConsoleApp1
             HSpeed = h;
             Vspeed = v;
             Fuel = fuel;
+            AngleChange = 0;
+            ThrustChange = 0;
         }
-
-        public void Order (int anglechange, int Thrustchange)
-        {
-            Console.WriteLine($"{Angle + anglechange} {Power + Thrustchange}");
-        }
-
 
         public void CalcPosition ()
         {
 
             // Lander is left or right from site
-            if (Site[0].X < X && Site[1].X < X)
-            {
+            if (Site[0].X <= X && Site[1].X >= X)
+                XPosition = RelativePosition.InSite;
+            if (X > Site[1].X)
                 XPosition = RelativePosition.Right;
-            }
-            if (Site[0].X > X && Site[1].X > X)
-            {
+            if (X < Site[0].X)
                 XPosition = RelativePosition.Left;
-            }
 
             // Lander is above or below from site
+            if (Y == Site[0].Y)
+                YPosition = RelativePosition.SiteLvl;
             if (Site[0].Y < Y)
-            {
                 YPosition = RelativePosition.Above;
-            }
             else if (Site[0].Y > Y)
-            {
                 YPosition = RelativePosition.Below;
+
+            Console.Error.WriteLine($"{XPosition} {YPosition}");
+        }
+
+        public void Decide()
+        {
+            
+            if (XPosition == RelativePosition.Right)
+            {
+                AngleChange = 15;
             }
-            Console.WriteLine($"{XPosition} {YPosition}");
+            if (XPosition == RelativePosition.Left)
+            {
+                AngleChange = -15;
+            }
+            if (YPosition == RelativePosition.Above)
+            {
+
+            }
+            if (YPosition == RelativePosition.SiteLvl && XPosition == RelativePosition.InSite)
+            {
+                Power = 0;
+            }
+            if (YPosition == RelativePosition.Above)
+            {
+                ThrustChange = 2;
+            }
+            if (YPosition == RelativePosition.Above && Vspeed >= 100)
+                ThrustChange = 1;
+
+            Console.Error.WriteLine($"{XPosition} {YPosition}");
 
         }
 
-
-
-
-
-
+        public void Order()
+        {
+            if (Power == 0 || Power == 4)
+            {
+                ThrustChange = 0;
+            }
+            if (Angle == -90 || Angle == 90)
+            {
+                AngleChange = 0;
+            }
+            Console.WriteLine($"{Angle + AngleChange} {Power + ThrustChange}");
+        }
 
     }
 
