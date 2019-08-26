@@ -19,6 +19,13 @@ namespace ConsoleApp1
 
             //FieldMapper FM = new FieldMapper(5);
 
+            Lander lander = new Lander();
+            lander.Site = new point[] { new point(500, 1000), new point(2000, 1000) };
+            lander.X = 3000;
+            lander.Y = 6999;
+
+            lander.CalcPosition();
+            
 
 
 
@@ -71,7 +78,6 @@ namespace ConsoleApp1
         public void FindSite ()
         {
 
-
             for (int i = 0; i < Field.Count - 1; i++)
             {
                 var split = Field[i + 1].X - Field[i].X;
@@ -83,15 +89,89 @@ namespace ConsoleApp1
 
                     // Fin du Landing Site
                     Site.Add(new point(Field[i+1].X, Field[i+1].Y));
-
-
                 }
+            }
+            Console.Error.WriteLine($"Début {Site[0].X} Fin {Site[1].X} ");
+        }
 
+    }
+    public enum RelativePosition { Above, Below, Left, Right };
+    public class Lander
+    {
+        // 0 - 7000
+        public int X;
+
+        // 0 - 3000
+        public int Y;
+
+        // + Up - Down
+        public int Vspeed;
+        // - Left + Right
+        public int HSpeed;
+
+        public int Fuel;
+
+        // + Left - Right (0 -90)
+        public int Angle;
+
+        // Thrust 0-4
+        public int Power;
+
+        public point[] Site = new point[2];
+
+        public RelativePosition XPosition;
+        public RelativePosition YPosition;
+
+        public Lander()
+        {
+        }
+
+        public void ActualizeLander (int x, int y, int h, int v, int fuel)
+        {
+            X = x;
+            Y = y;
+            HSpeed = h;
+            Vspeed = v;
+            Fuel = fuel;
+        }
+
+        public void Order (int anglechange, int Thrustchange)
+        {
+            Console.WriteLine($"{Angle + anglechange} {Power + Thrustchange}");
+        }
+
+
+        public void CalcPosition ()
+        {
+
+            // Lander is left or right from site
+            if (Site[0].X < X && Site[1].X < X)
+            {
+                XPosition = RelativePosition.Right;
+            }
+            if (Site[0].X > X && Site[1].X > X)
+            {
+                XPosition = RelativePosition.Left;
             }
 
-            Console.Error.WriteLine($"Début {Site[0].X} Fin {Site[1].X} ");
+            // Lander is above or below from site
+            if (Site[0].Y < Y)
+            {
+                YPosition = RelativePosition.Above;
+            }
+            else if (Site[0].Y > Y)
+            {
+                YPosition = RelativePosition.Below;
+            }
+            Console.WriteLine($"{XPosition} {YPosition}");
 
         }
+
+
+
+
+
+
 
     }
 
