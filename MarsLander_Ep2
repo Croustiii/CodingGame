@@ -35,6 +35,7 @@ class Player
         
         FM.FindSite();
         Console.Error.WriteLine($" Altitude of site is {FM.Site[0].Y} {FM.Site[1].Y}");
+        lander.Site = FM.Site;
 
         // game loop
         while (true)
@@ -48,8 +49,7 @@ class Player
             int rotate = int.Parse(inputs[5]); // the rotation angle in degrees (-90 to 90).
             int power = int.Parse(inputs[6]); // the thrust power (0 to 4).
 
-            lander.Site = FM.Site;
-            lander.ActualizeLander(X,Y,hSpeed,vSpeed,fuel);
+            lander.ActualizeLander(X,Y,hSpeed,vSpeed,fuel,rotate,power);
             lander.CalcPosition();
             lander.Decide();
             lander.Order();
@@ -145,13 +145,15 @@ public class Lander
     {
     }
 
-    public void ActualizeLander (int x, int y, int h, int v, int fuel)
+    public void ActualizeLander (int x, int y, int h, int v, int fuel, int angle, int power)
     {
         X = x;
         Y = y;
         HSpeed = h;
         Vspeed = v;
         Fuel = fuel;
+        Angle = angle;
+        Power = power;
     }
 
     public void CalcPosition ()
@@ -198,6 +200,16 @@ public class Lander
         if (YPosition == RelativePosition.Above && Vspeed >= 100)
             ThrustChange = 1;
 
+        // HorizontalSpeed Decision
+        // Droite
+        if (HSpeed >= 50 )
+            AngleChange = +15;
+        if (HSpeed <= -50)
+            AngleChange = -15;
+
+        // Vertical Speed Decision
+
+
         Console.Error.WriteLine($"Angle decision : {AngleChange} Power decision : {ThrustChange}");
 
     }
@@ -209,7 +221,7 @@ public class Lander
             ThrustChange = 0;
         }
         
-        if (Angle + AngleChange < -90 || Angle + AngleChange > 90)
+        if (Angle + AngleChange < -75 || Angle + AngleChange > 75)
         {
             AngleChange = 0;
         }
