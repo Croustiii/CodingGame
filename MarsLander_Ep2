@@ -213,6 +213,55 @@ public class Lander
         Console.Error.WriteLine($"Angle decision : {AngleChange} Power decision : {ThrustChange}");
 
     }
+    public void Stabilize()
+    {
+        if (HSpeed > 50)
+        {
+            if (Angle < 0)
+            {
+                if (Angle < 0)
+                {
+                    AngleChange = 15;
+                    if (Power >= 3)
+                        ThrustChange = -1;
+                }
+
+                AngleChange = 15;
+                if (Power < 3)
+                {
+                    ThrustChange = 1;
+                }
+
+            }
+            if (Angle > 0)
+            {
+
+
+
+            }
+
+        }
+        if (HSpeed < -50)
+        {
+            if (Angle > 0)
+            {
+                AngleChange = -15;
+                while (Angle > 0)
+                {
+                    ThrustChange = -1;
+                }
+                if (Power < 3)
+                {
+                    ThrustChange = 1;
+                }
+            }
+            if (Angle < )
+            {
+
+            }
+        }
+    }
+
 
     public void Order()
     {
